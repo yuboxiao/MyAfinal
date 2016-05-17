@@ -39,6 +39,17 @@ public class MainActivity extends Activity {
 
         mFinalHttp.get(URL, params, new AjaxCallBack<String>() {
 
+            @Override
+            public void onStart() {
+                System.out.println("------- onStart ------");
+                super.onStart();
+            }
+
+            @Override
+            public void onLoading(long count, long current) {
+                System.out.println("------- onLoading ------ 当前/总共 :" + current +"/" + count);
+                super.onLoading(count, current);
+            }
 
             @Override
             public void onSuccess(String s) {

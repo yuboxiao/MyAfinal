@@ -32,7 +32,7 @@ public class FinalHttp {
 
     private HttpContext mHttpContext;
 
-    private String mCharset = "urf-8";
+    private String mCharset = "utf-8";
 
 
     private static FinalHttp mFinalHttp;
@@ -63,6 +63,7 @@ public class FinalHttp {
     public  void get(String url,AjaxParams params,AjaxCallBack<? extends Object> callBack){
         HttpGet httpGet = new HttpGet(getUrlWithQueryString(url,params));
 
+        httpGet.setHeader("Accept-Encoding", "identity");
         httpGet.setHeader("JsonStub-User-Key", "0a0d2a98-1798-4349-9f3a-c2a6dc5b117c");
         httpGet.setHeader("JsonStub-Project-Key", "6646e5dc-539a-4676-8028-bb5544a1e9b5");
         httpGet.setHeader("Content-Type", "application/json;charset=UTF-8");

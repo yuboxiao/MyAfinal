@@ -1,9 +1,12 @@
 package com.whut.afinal.http;
 
 import android.os.AsyncTask;
+import android.os.SystemClock;
 
 import com.whut.afinal.http.entityhandler.EntityCallBack;
+import com.whut.afinal.http.entityhandler.StringEntityHandler;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -13,9 +16,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.protocol.HttpContext;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * ============================================================
@@ -38,6 +39,8 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
     private HttpContext mContext;
     private AjaxCallBack<T> mCallBack;
     private String mCharset;
+
+    private StringEntityHandler mStrEntityHandler = new StringEntityHandler();
 
     public HttpHandlerTask(AbstractHttpClient client, HttpContext context, AjaxCallBack<T> callBack, String charset) {
         mClient = client;
@@ -76,6 +79,10 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
 
             try {
                 HttpResponse response = mClient.execute(request, mContext);
+                Header[] headers = response.getAllHeaders();
+                for (Header header:headers){
+                    System.out.println(header.getName() + " -------- " + header.getValue());
+                }
                 handleResponse(response);
                 return;
             }catch (Exception e){
@@ -91,7 +98,7 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
      * @param response
      */
     private void handleResponse(HttpResponse response) {
-        String result ;
+        Object responseBody = null;
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();
         if(statusCode > 300 ){
@@ -99,18 +106,11 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
         }else{
             try {
                 HttpEntity entity = response.getEntity();
-                InputStream inputStream = entity.getContent();
-                int len ;
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024 * 4];
-                while ((len=inputStream.read(buffer))!=-1){
-                    baos.write(buffer,0,len);
-                }
-                byte[] data = baos.toByteArray();
-                result = new String(data,"utf8");
-
-            } catch (IOException e) {
+                responseBody = mStrEntityHandler.handleEntity(entity, mCharset, this);
+                publishProgress(UPDATE_SUCCESS,responseBody);
+            } catch (Exception e) {
                 e.printStackTrace();
+                publishProgress(UPDATE_FAILURE, e, 0, e.getMessage());
             }
         }
     }
@@ -120,8 +120,46 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
     private final static int UPDATE_FAILURE = 3;
     private final static int UPDATE_SUCCESS = 4;
 
+    private long time;
     @Override
     public void callBack(long count, long current, boolean mustNoticeUI) {
+        if(mCallBack!=null && mCallBack.isProgress()){
+            if(mustNoticeUI){
+                publishProgress(UPDATE_LOADING,count,current);
+            }else{
+                long thisTime = SystemClock.uptimeMillis();
+                if(thisTime - time >= mCallBack.getRate()){
+                    time = thisTime ;
+                    publishProgress(UPDATE_LOADING,count,current);
+                }
+            }
+        }
+    }
 
+
+    @Override
+    protected void onProgressUpdate(Object... values) {
+        int update = Integer.valueOf(String.valueOf(values[0]));
+        switch (update) {
+            case UPDATE_START:
+                if(mCallBack!=null)
+                    mCallBack.onStart();
+                break;
+            case UPDATE_LOADING:
+                if(mCallBack!=null)
+                    mCallBack.onLoading(Long.valueOf(String.valueOf(values[1])),Long.valueOf(String.valueOf(values[2])));
+                break;
+            case UPDATE_FAILURE:
+                if(mCallBack!=null)
+                    mCallBack.onFailure((Throwable)values[1],(Integer)values[2],(String)values[3]);
+                break;
+            case UPDATE_SUCCESS:
+                if(mCallBack!=null)
+                    mCallBack.onSuccess((T)values[1]);
+                break;
+            default:
+                break;
+        }
+        super.onProgressUpdate(values);
     }
 }
