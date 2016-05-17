@@ -122,6 +122,6 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
 
     @Override
     public void callBack(long count, long current, boolean mustNoticeUI) {
-        
+
     }
 }
