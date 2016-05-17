@@ -1,6 +1,4 @@
-package com.whut.afinal.handler;
-
-import android.os.AsyncTask;
+package com.whut.afinal.http.entityhandler;
 
 /**
  * ============================================================
@@ -9,7 +7,7 @@ import android.os.AsyncTask;
  * <br/>
  * 版 本 :        1.0
  * <br/>
- * 创建日期 ：     2016-05-10 下午2:53
+ * 创建日期 ：     2016-05-17 下午5:53
  * <br/>
  * 描 述 ：
  * <br/>
@@ -17,12 +15,8 @@ import android.os.AsyncTask;
  * <br/>
  * ============================================================
  **/
-public class HttpHandlerTask extends AsyncTask{
+public interface EntityCallBack {
 
-    @Override
-    protected Object doInBackground(Object[] params) {
+    public void callBack(long count,long current,boolean mustNoticeUI);
 
-
-        return null;
-    }
 }
