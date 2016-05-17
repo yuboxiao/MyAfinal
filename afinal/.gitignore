@@ -40,3 +40,5 @@ proguard/
 
 # Gradle cache
 .gradle
+build.gradle
+proguard-rules.pro
