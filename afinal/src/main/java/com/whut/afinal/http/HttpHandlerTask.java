@@ -1,12 +1,11 @@
 package com.whut.afinal.http;
 
-import android.os.AsyncTask;
 import android.os.SystemClock;
 
+import com.whut.afinal.component.core.AsyncTask;
 import com.whut.afinal.http.entityhandler.EntityCallBack;
 import com.whut.afinal.http.entityhandler.StringEntityHandler;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -79,10 +78,6 @@ public class HttpHandlerTask<T> extends AsyncTask<Object, Object, Object> implem
 
             try {
                 HttpResponse response = mClient.execute(request, mContext);
-                Header[] headers = response.getAllHeaders();
-                for (Header header:headers){
-                    System.out.println(header.getName() + " -------- " + header.getValue());
-                }
                 handleResponse(response);
                 return;
             }catch (Exception e){

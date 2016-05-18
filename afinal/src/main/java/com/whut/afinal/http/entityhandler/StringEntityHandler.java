@@ -35,11 +35,11 @@ public class StringEntityHandler {
     public Object handleEntity(HttpEntity entity,String charset,EntityCallBack callBack) throws IOException {
         InputStream inputStream = entity.getContent();
 
+
         int len ;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         long count = entity.getContentLength();
-        System.out.println(count+"--------");
         long curCount = 0;
         while ((len=inputStream.read(buffer))!=-1){
             baos.write(buffer, 0, len);
